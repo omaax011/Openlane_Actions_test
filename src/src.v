@@ -1,4 +1,7 @@
-module src(
+`include "sumador_completo.v"
+`include "sumador_medio.v"
+
+module src (
     input  wire [7:0] ui_in,    // Dedicated inputs - connected to the input switches
     output wire [7:0] uo_out,   // Dedicated outputs - connected to the 7 segment display
     input  wire [7:0] uio_in,   // IOs: Bidirectional Input path
@@ -6,55 +9,53 @@ module src(
     output wire [7:0] uio_oe,   // IOs: Bidirectional Enable path (active high: 0=input, 1=output)
     input  wire       ena,      // will go high when the design is enabled
     input  wire       clk,      // clock
-    input  wire       rst_n     // reset_n - low to 
+    input  wire       rst_n     // reset_n - low to reset
+
+);
+
+    wire [3:0] A;
+    wire [3:0] B;
+    wire [4:0] S;
+    wire [3:0] C;
     
+   // assign uio_in = 8'b11111111;
+    assign uio_out = 8'b11111111;
+    assign uio_oe = 8'b11111111;
+    
+    assign A = ui_in[3:0];
+    assign B = ui_in[7:4];
+ 
+    sumadormedio SM(.A(A[0]),
+        .B(B[0]),
+        .S(S[0]),
+        .C(C[0]));
+    
+    sumadorcompleto  SC1(.A(A[1]),
+        .Cin(C[0]),
+        .B(B[1]),
+        .S(S[1]),
+        .Cout(C[1])
     );
-    
-    wire [2:0] bits ;
+  
+    sumadorcompleto  SC2(.A(A[2]),
+        .Cin(C[1]),
+        .B(B[2]),
+        .S(S[2]),
+        .Cout(C[2])
+    );
 
-    reg [7:0] cnt;
-    wire [7:0] duty;
-    reg pwm_q,ppm_q;
-    reg [2:0] bits_pre;
-    wire pwm_d,ppm_d;
-
-    assign duty = ui_in [7:0];
-    assign bits = uio_in[2:0];
-
-    assign uio_oe = 8'b11111000;
-    assign uio_out[7:0] = 8'b00000000;
-    assign uo_out[7:1] = 7'b0000000;
-    
-    always @(posedge clk) begin
-      if(rst_n) begin
-        bits_pre <= bits;
-        if(bits_pre != bits) begin
-            cnt <= 8'd0;
-            pwm_q <= 1'b0;
-        end
-        else begin
-            
-            pwm_q <= pwm_d;
-                     
-            if((cnt >= (2**bits)))
-                cnt <= 0;
-            else begin     
-                cnt <= cnt + 1;
-            end
-        end
-        bits_pre <= bits;
-      end else begin
-         pwm_q <= 1'b0;
-         cnt <= 0;
-         bits_pre <= bits;
-      end
-    end
+        
+    sumadorcompleto  SC3(.A(A[3]),
+        .Cin(C[2]),
+        .B(B[3]),
+        .S(S[3]),
+        .Cout(C[3])
+    );
 
     
-    assign pwm_d = (cnt < duty);
-    assign uo_out[0] = pwm_q;
+    assign S[4] = C[3];
+
+   assign  uo_out [4:0]= S; 
+   assign uo_out [7:5] = 3'd0; 
     
-
-
 endmodule
-
