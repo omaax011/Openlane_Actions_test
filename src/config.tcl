@@ -1,7 +1,9 @@
 set ::env(DESIGN_NAME) src
 
 set ::env(VERILOG_FILES) "\
-	$::env(DESIGN_DIR)/src.v"
+	$::env(DESIGN_DIR)/src.v
+ 	$::env(DESIGN_DIR)/sumador_completo.v
+  	$::env(DESIGN_DIR)/sumador_medio.v"
  
 set ::env(DESIGN_IS_CORE) 0
 
